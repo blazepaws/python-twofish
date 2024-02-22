@@ -10,13 +10,47 @@ on:
     branches: [ "master" ]
 
 jobs:
-  build:
+  Test Python 3:
 
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
-        python-version: ["2.7", "3.0.1", "3.1.4", "3.2.5", "3.3.7", "3.4.10", "3.5.10", "3.6", "3.7", "3.8", "3.9", "3.10", "3.11", "3.12"]
+        python-version: ["3.0", "3.3", "3.6", "3.7", "3.8", "3.9", "3.10", "3.11", "3.12"]
+
+    steps:
+    - uses: actions/checkout@v4
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: setup-python@master
+      with:
+        python-version: ${{ matrix.python-version }}
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        python -m pip install flake8 pytest setuptools
+    - name: Install
+      run: |
+        python -m pip install .
+    - name: Lint with flake8
+      run: |
+        # stop the build if there are Python syntax errors or undefined names
+        flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
+        # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
+        flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
+    - name: Doc Test
+      run: |
+        python -m doctest README.rst
+    - name: Unit Test
+      run: |
+        python -m pytest
+
+  Test Python 2:
+    
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["2.7"]
 
     steps:
     - uses: actions/checkout@v4

@@ -10,7 +10,7 @@ on:
     branches: [ "master" ]
 
 jobs:
-  Test Python 3:
+  test-python3:
 
     runs-on: ubuntu-latest
     strategy:
@@ -44,7 +44,7 @@ jobs:
       run: |
         python -m pytest
 
-  Test Python 2:
+  test-python2:
     
     runs-on: ubuntu-latest
     strategy:

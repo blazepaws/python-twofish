@@ -8,15 +8,24 @@ Copyright (c) 2013 Keybase
 Python module and ctypes bindings
 """
 
-import imp
 import sys
-
 from ctypes import (cdll, Structure,
                     POINTER, pointer,
                     c_char_p, c_int, c_uint32,
                     create_string_buffer)
 
-_twofish = cdll.LoadLibrary(imp.find_module('_twofish')[1])
+# Import DLL
+if sys.version_info < (3, 4, 0, 'final', 0):
+    # On python versions below 3.4 use the original imp module to locate the extension module to load.
+    import imp
+    _twofish = cdll.LoadLibrary(imp.find_module('_twofish')[1])
+
+else:
+    import importlib.util
+    _dll_module_spec = importlib.util.find_spec("_twofish")
+    assert _dll_module_spec.has_location
+    _twofish = cdll.LoadLibrary(_dll_module_spec.origin)
+
 
 class _Twofish_key(Structure):
     _fields_ = [("s", (c_uint32 * 4) * 256),
@@ -25,6 +34,8 @@ class _Twofish_key(Structure):
 _Twofish_initialise = _twofish.exp_Twofish_initialise
 _Twofish_initialise.argtypes = []
 _Twofish_initialise.restype = None
+
+_Twofish_initialise()
 
 _Twofish_prepare_key = _twofish.exp_Twofish_prepare_key
 _Twofish_prepare_key.argtypes = [ c_char_p,  # uint8_t key[]
@@ -45,8 +56,6 @@ _Twofish_decrypt.argtypes = [ POINTER(_Twofish_key),
                               c_char_p      # uint8_t p[16]
                             ]
 _Twofish_decrypt.restype = None
-
-_Twofish_initialise()
 
 IS_PY2 = sys.version_info < (3, 0, 0, 'final', 0)
 

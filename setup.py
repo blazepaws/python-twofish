@@ -8,7 +8,10 @@ Copyright (c) 2013 Keybase
 setup.py - build and package info
 """
 
-from setuptools import setup, Extension
+if sys.version_info < (3, 0, 0, 'final', 0):
+    from distutils import setup, Extension
+else:
+    from setuptools import setup, Extension
 
 twofish_module = Extension('_twofish',
                           sources=['twofish-0.3/twofish.c', 'twofish.c'],
